@@ -1,0 +1,226 @@
+import { useEffect, useState } from "react";
+
+
+export default function App() {
+  const [todos, setTodos] = useState(() => {
+    const savedTodos = localStorage.getItem("todos");
+    if (savedTodos) {
+      return JSON.parse(savedTodos);
+    } else {
+      return [];
+    }
+  });
+  const [todo, setTodo] = useState("");
+ 
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [currentTodo, setCurrentTodo] = useState({});
+
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
+  function handleInputChange(e) {
+    setTodo(e.target.value);
+  }
+
+  function handleEditInputChange(e) {
+
+    setCurrentTodo({ ...currentTodo, text: e.target.value });
+    console.log(currentTodo);
+  }
+
+  function handleFormSubmit(e) {
+    e.preventDefault();
+
+    if (todo !== "") {
+      setTodos([
+        ...todos,
+        {
+          id: todos.length + 1,
+          text: todo.trim()
+        }
+      ]);
+    }
+
+    setTodo("");
+  }
+
+  function handleEditFormSubmit(e) {
+    e.preventDefault();
+
+    handleUpdateTodo(currentTodo.id, currentTodo);
+  }
+
+  function handleDeleteClick(id) {
+    const removeItem = todos.filter((todo) => {
+      return todo.id !== id;
+    });
+    setTodos(removeItem);
+  }
+
+ 
+  function handleUpdateTodo(id, updatedTodo) {
+    const updatedItem = todos.map((todo) => {
+      return todo.id === id ? updatedTodo : todo;
+    });
+   
+    setIsEditing(false);
+
+    setTodos(updatedItem);
+  }
+
+
+  function handleEditClick(todo) {
+    
+    setIsEditing(true);
+    
+    setCurrentTodo({ ...todo });
+  }
+
+  return (
+    <div className="App">
+   
+      {isEditing ? (
+        <form onSubmit={handleEditFormSubmit}>   
+          <h2>Edit Todo</h2>
+          <label htmlFor="editTodo">Edit todo: </label>
+          <input
+            name="editTodo"
+            type="text"
+            placeholder="Edit todo"
+            value={currentTodo.text}
+            onChange={handleEditInputChange}
+          />
+          <button type="submit">Update</button>
+          <button onClick={() => setIsEditing(false)}>Cancel</button>
+        </form>
+      ) : (
+        <form onSubmit={handleFormSubmit}>
+          <h2>Add Todo</h2>
+          <label htmlFor="todo">Add todo: </label>
+          <input
+            name="todo"
+            type="text"
+            placeholder="Create a new todo"
+            value={todo}
+            onChange={handleInputChange}
+          />
+          <button type="submit">Add</button>
+        </form>
+      )}
+
+      <ul className="todo-list">
+        {todos.map((todo) => (
+          <li key={todo.id}>
+            {todo.text}
+            <button onClick={() => handleEditClick(todo)}>Edit</button>
+            <button onClick={() => handleDeleteClick(todo.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+/////////////////////
+
+import { useState } from "react";
+function Todo() {
+  const [value, setvalue] = useState("");
+  const [value2, setvalue2] = useState("");
+
+  const [arr, setArr] = useState([]);
+  const [flag2, setFlag] = useState(false);
+  const onAddEvent = (event) => {
+    event.preventDefault();
+    if (arr !== "") {
+      setArr([...arr, { id: arr.length + 1, text: value, flag: false }]);
+    }
+    setvalue("");
+  };
+
+  const deleteClick = (id) => {
+    // 입력받은 것의 id를 받아온다
+    // value의id가 같지않은것만 removeItem에 넣어줌
+    // arr을 removeItem으로 set
+    // 발류가먼데-> 내부 원소들 여기서는 arr
+
+    const removeItem = 
+    arr.filter((value) => {
+      return value.id !== id;
+    });
+
+    setArr(removeItem);
+  };
+
+  const onUpdate = (array) => {
+    //id를받아옴
+    //누른것만 true false해서 만들어보기
+    //그러면 값에 flag추가해서 하는게 편할듯-> ing..
+    //id같은거만 flag를 변경시키고싶음
+    //flag2는 상태변화감지시키기위해 추가한것
+
+    //여기서 newArr=arr.map{} 한후 setArr(newArr)하면 오류가 난다 공부+수정필요
+    //왠지 아직 모름..
+    //map은 새로운 배열반환하는게 아니었나?
+    //console log 해보니 뭔가이상함
+    //key 겹칠떄가있다 해결필요+
+
+
+    arr.map((value) => {
+      if (value.id === array.id) array.flag = true;
+    });
+    
+    if (!flag2) setFlag(true);
+    if (flag2) setFlag(false);
+    
+  };
+
+  const onEdit = (array) => {
+    arr.map((value) => {
+      if (value.id === array.id) {
+        array.flag = false;
+        value.text = value2;
+      }
+    });
+    if (!flag2) setFlag(true);
+    if (flag2) setFlag(false);
+  };
+
+  const onChangeEvent = (event) => {
+    setvalue(event.target.value);
+  };
+
+  const onChangeT = (event) => {
+    setvalue2(event.target.value);
+  };
+  return (
+    <div>
+      <div>
+        <form onSubmit={onAddEvent}>
+          <h1>MY TODO LIST</h1>
+          <input value={value} onChange={onChangeEvent}></input>
+        </form>
+      </div>
+      <div>
+        {arr.map((a) => (
+          <li key={a.id}>
+            {!a.flag ? (
+              <span>{a.text} </span>
+            ) : (
+              <input placeholder={a.text} onChange={onChangeT}></input>
+            )}
+            <button onClick={() => deleteClick(a.id)}>Delete</button>
+            {!a.flag ? (
+              <button onClick={() => onUpdate(a)}>Edit</button>
+            ) : (
+              <button onClick={() => onEdit(a)}>Update</button>
+            )}
+          </li>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default Todo;
