@@ -1,4 +1,6 @@
 import { useState } from "react";
+import styles from "./Todo.module.css";
+
 function Todo() {
   const [value, setvalue] = useState("");
   const [value2, setvalue2] = useState("");
@@ -18,7 +20,7 @@ function Todo() {
     // value의id가 같지않은것만 removeItem에 넣어줌
     // arr을 removeItem으로 set
     // 발류가먼데-> 내부 원소들 여기서는 arr
-
+    //
     const removeItem = arr.filter((value) => {
       return value.id !== id;
     });
@@ -75,19 +77,19 @@ function Todo() {
       </div>
       <div>
         {arr.map((a) => (
-          <li key={a.id}>
+          <div key={a.id}>
             {!a.flag ? (
               <span>{a.text} </span>
             ) : (
               <input placeholder={a.text} onChange={onChangeT}></input>
             )}
-            <button onClick={() => deleteClick(a.id)}>Delete</button>
+            <button className={styles.buttonStyle} onClick={() => deleteClick(a.id)}>Delete</button>
             {!a.flag ? (
               <button onClick={() => onUpdate(a)}>Edit</button>
             ) : (
               <button onClick={() => onEdit(a)}>Update</button>
             )}
-          </li>
+          </div>
         ))}
       </div>
     </div>

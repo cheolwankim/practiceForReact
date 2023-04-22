@@ -84,7 +84,7 @@ function Todo() {
             ) : (
               <input placeholder={a.text} onChange={onChangeT}></input>
             )}
-            <button onClick={() => deleteClick(a.id)}>Delete</button>
+            <button className="buttonStyle" onClick={() => deleteClick(a.id)}>Delete</button>
             {!a.flag ? (
               <button onClick={() => onUpdate(a)}>Edit</button>
             ) : (
