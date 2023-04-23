@@ -1,99 +1,105 @@
-import { useState } from "react";
-import styles from "./Todo.module.css";
+import React from 'react';
+import { createGlobalStyle } from 'styled-components';
 
-function Todo() {
-  const [value, setvalue] = useState("");
-  const [value2, setvalue2] = useState("");
+const GlobalStyle = createGlobalStyle`
+  body {
+    background: #e9ecef;
+  }
+`;
 
-  const [arr, setArr] = useState([]);
-  const [flag2, setFlag] = useState(false);
-  const onAddEvent = (event) => {
-    event.preventDefault();
-    if (arr !== "") {
-      setArr([...arr, { id: Math.random(), text: value, flag: false }]);
-    }
-    setvalue("");
-  };
-
-  const deleteClick = (id) => {
-    // 입력받은 것의 id를 받아온다
-    // value의id가 같지않은것만 removeItem에 넣어줌
-    // arr을 removeItem으로 set
-    // 발류가먼데-> 내부 원소들 여기서는 arr
-    //
-    const removeItem = arr.filter((value) => {
-      return value.id !== id;
-    });
-
-    setArr(removeItem);
-  };
-
-  const onUpdate = (array) => {
-    //id를받아옴
-    //누른것만 true false해서 만들어보기
-    //그러면 값에 flag추가해서 하는게 편할듯-> ing..
-    //id같은거만 flag를 변경시키고싶음
-    //flag2는 상태변화감지시키기위해 추가한것
-
-    //여기서 newArr=arr.map{} 한후 setArr(newArr)하면 오류가 난다 공부+수정필요
-    //왠지 아직 모름..
-    //map은 새로운 배열반환하는게 아니었나?
-    //console log 해보니 뭔가이상함
-    //key 겹칠떄가있다 해결필요+ => id를 랜덤하게 만들어서 해결
-
-    arr.map((value) => {
-      if (value.id === array.id) array.flag = true;
-    });
-
-    if (!flag2) setFlag(true);
-    if (flag2) setFlag(false);
-  };
-
-  const onEdit = (array) => {
-    arr.map((value) => {
-      if (value.id === array.id) {
-        array.flag = false;
-        value.text = value2;
-      }
-    });
-    if (!flag2) setFlag(true);
-    if (flag2) setFlag(false);
-  };
-
-  const onChangeEvent = (event) => {
-    setvalue(event.target.value);
-  };
-
-  const onChangeT = (event) => {
-    setvalue2(event.target.value);
-  };
+function App() {
   return (
-    <div>
-      <div>
-        <form onSubmit={onAddEvent}>
-          <h1>MY TODO LIST</h1>
-          <input value={value} onChange={onChangeEvent}></input>
-        </form>
-      </div>
-      <div>
-        {arr.map((a) => (
-          <div key={a.id}>
-            {!a.flag ? (
-              <span>{a.text} </span>
-            ) : (
-              <input placeholder={a.text} onChange={onChangeT}></input>
-            )}
-            <button className={styles.buttonStyle} onClick={() => deleteClick(a.id)}>Delete</button>
-            {!a.flag ? (
-              <button onClick={() => onUpdate(a)}>Edit</button>
-            ) : (
-              <button onClick={() => onEdit(a)}>Update</button>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
+    <>
+      <GlobalStyle />
+      <div>안녕하세요</div>
+    </>
   );
 }
 
-export default Todo;
+export default App;
+//
+import React, { useReducer } from 'react';
+
+const initialTodos = [
+  {
+    id: 1,
+    text: '프로젝트 생성하기',
+    done: true
+  },
+  {
+    id: 2,
+    text: '컴포넌트 스타일링하기',
+    done: true
+  },
+  {
+    id: 3,
+    text: 'Context 만들기',
+    done: false
+  },
+  {
+    id: 4,
+    text: '기능 구현하기',
+    done: false
+  }
+];
+
+function todoReducer(state, action) {
+  switch (action.type) {
+    case 'CREATE':
+      return state.concat(action.todo);
+    case 'TOGGLE':
+      return state.map(todo =>
+        todo.id === action.id ? { ...todo, done: !todo.done } : todo
+      );
+    case 'REMOVE':
+      return state.filter(todo => todo.id !== action.id);
+    default:
+      throw new Error(`Unhandled action type: ${action.type}`);
+  }
+}
+
+export function TodoProvider({ children }) {
+  const [state, dispatch] = useReducer(todoReducer, initialTodos);
+  return children;
+}
+//
+import React from 'react';
+import styled from 'styled-components';
+import { useTodoState } from '../TodoContext';
+
+const TodoHeadBlock = styled.div`
+  padding-top: 48px;
+  padding-left: 32px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e9ecef;
+  h1 {
+    margin: 0;
+    font-size: 36px;
+    color: #343a40;
+  }
+  .day {
+    margin-top: 4px;
+    color: #868e96;
+    font-size: 21px;
+  }
+  .tasks-left {
+    color: #20c997;
+    font-size: 18px;
+    margin-top: 40px;
+    font-weight: bold;
+  }
+`;
+
+function TodoHead() {
+  const todos = useTodoState();
+  const undoneTasks = todos.filter(todo => !todo.done);
+
+  return (
+    <TodoHeadBlock>
+      <h1>2019년 7월 10일</h1>
+      <div className="day">수요일</div>
+      <div className="tasks-left">할 일 {undoneTasks.length}개 남음</div>
+    </TodoHeadBlock>
+  );
+}
